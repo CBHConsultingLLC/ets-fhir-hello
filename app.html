@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FHIR API Testing Dashboard - Oracle Health</title>
+  <title>FHIR Provider - API Testing</title>
   
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,36 +17,98 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   
   <style>
-    .api-card {
-      transition: transform 0.2s ease-in-out;
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #34495e;
+      --accent-color: #3498db;
+      --success-color: #27ae60;
+      --warning-color: #f39c12;
+      --danger-color: #e74c3c;
+      --light-gray: #ecf0f1;
+      --dark-gray: #7f8c8d;
+      --border-color: #bdc3c7;
     }
+
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .navbar {
+      background-color: var(--primary-color) !important;
+    }
+
+    .api-card {
+      transition: all 0.2s ease-in-out;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+
     .api-card:hover {
       transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
-    .request-response {
-      max-height: 400px;
-      overflow-y: auto;
+
+    .card-header {
+      background-color: var(--secondary-color) !important;
+      color: white !important;
+      border-bottom: 2px solid var(--primary-color);
     }
+
+    .btn-primary-custom {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+      color: white;
+    }
+
+    .btn-primary-custom:hover {
+      background-color: #2980b9;
+      border-color: #2980b9;
+    }
+
+    .btn-outline-primary-custom {
+      color: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+
+    .btn-outline-primary-custom:hover {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+      color: white;
+    }
+
     .status-success {
-      color: #198754;
+      color: var(--success-color);
     }
+
     .status-error {
-      color: #dc3545;
+      color: var(--danger-color);
     }
+
     .status-loading {
-      color: #0d6efd;
+      color: var(--accent-color);
     }
-    pre {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 0.375rem;
-      padding: 1rem;
-      font-size: 0.875rem;
+
+    .api-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .collapse-icon {
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .collapse-icon.rotated {
+      transform: rotate(180deg);
+    }
+
+    .card-header .btn-link:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 0.25rem;
     }
   </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
       <a class="navbar-brand" href="#">
         <i class="bi bi-heart-pulse me-2"></i>
@@ -59,205 +121,200 @@
     </div>
   </nav>
 
-  <div class="container mt-4">
-    <!-- Connection Status -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="alert alert-info" role="alert" id="connectionStatus">
+  <div class="container-fluid mt-4">
+    <div class="row">
+      <!-- API Testing Section -->
+      <div class="col-lg-6">
+        <!-- Connection Status -->
+        <div class="alert alert-info mb-4" role="alert" id="connectionStatus">
           <i class="bi bi-wifi me-2"></i>
           <span id="statusText">Connecting to FHIR server...</span>
         </div>
-      </div>
-    </div>
 
-    <!-- API Testing Cards -->
-    <div class="row g-4">
-      <!-- Patient API -->
-      <div class="col-lg-6">
-        <div class="card api-card h-100">
-          <div class="card-header bg-success text-white">
-            <h5 class="card-title mb-0">
-              <i class="bi bi-person me-2"></i>
-              Patient API
-            </h5>
-          </div>
-          <div class="card-body">
-            <p class="card-text">Read patient information and demographics</p>
-            <button class="btn btn-success me-2" onclick="testPatientRead()">
-              <i class="bi bi-play-fill me-1"></i>
-              Test Patient Read
-            </button>
-            <button class="btn btn-outline-success" onclick="testPatientSearch()">
-              <i class="bi bi-search me-1"></i>
-              Search Patients
-            </button>
-            <div class="mt-3">
-              <div class="status" id="patientStatus"></div>
-              <div class="request-response" id="patientResponse"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Observation API -->
-      <div class="col-lg-6">
-        <div class="card api-card h-100">
-          <div class="card-header bg-info text-white">
-            <h5 class="card-title mb-0">
-              <i class="bi bi-graph-up me-2"></i>
-              Observation API
-            </h5>
-          </div>
-          <div class="card-body">
-            <p class="card-text">Retrieve patient observations and vital signs</p>
-            <button class="btn btn-info me-2" onclick="testObservationRead()">
-              <i class="bi bi-play-fill me-1"></i>
-              Get Observations
-            </button>
-            <button class="btn btn-outline-info" onclick="testVitalSigns()">
-              <i class="bi bi-heart-pulse me-1"></i>
-              Vital Signs
-            </button>
-            <div class="mt-3">
-              <div class="status" id="observationStatus"></div>
-              <div class="request-response" id="observationResponse"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Condition API -->
-      <div class="col-lg-6">
-        <div class="card api-card h-100">
-          <div class="card-header bg-warning text-dark">
-            <h5 class="card-title mb-0">
-              <i class="bi bi-clipboard-pulse me-2"></i>
-              Condition API
-            </h5>
-          </div>
-          <div class="card-body">
-            <p class="card-text">Access patient conditions and diagnoses</p>
-            <button class="btn btn-warning me-2" onclick="testConditionRead()">
-              <i class="bi bi-play-fill me-1"></i>
-              Get Conditions
-            </button>
-            <button class="btn btn-outline-warning" onclick="testActiveConditions()">
-              <i class="bi bi-exclamation-triangle me-1"></i>
-              Active Only
-            </button>
-            <div class="mt-3">
-              <div class="status" id="conditionStatus"></div>
-              <div class="request-response" id="conditionResponse"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Medication API -->
-      <div class="col-lg-6">
-        <div class="card api-card h-100">
-          <div class="card-header bg-danger text-white">
-            <h5 class="card-title mb-0">
-              <i class="bi bi-capsule me-2"></i>
-              Medication API
-            </h5>
-          </div>
-          <div class="card-body">
-            <p class="card-text">Review patient medications and prescriptions</p>
-            <button class="btn btn-danger me-2" onclick="testMedicationRead()">
-              <i class="bi bi-play-fill me-1"></i>
-              Get Medications
-            </button>
-            <button class="btn btn-outline-danger" onclick="testMedicationRequests()">
-              <i class="bi bi-prescription2 me-1"></i>
-              Prescriptions
-            </button>
-            <div class="mt-3">
-              <div class="status" id="medicationStatus"></div>
-              <div class="request-response" id="medicationResponse"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Encounter API -->
-      <div class="col-lg-6">
-        <div class="card api-card h-100">
-          <div class="card-header bg-secondary text-white">
-            <h5 class="card-title mb-0">
-              <i class="bi bi-hospital me-2"></i>
-              Encounter API
-            </h5>
-          </div>
-          <div class="card-body">
-            <p class="card-text">Access patient encounters and visits</p>
-            <button class="btn btn-secondary me-2" onclick="testEncounterRead()">
-              <i class="bi bi-play-fill me-1"></i>
-              Get Encounters
-            </button>
-            <button class="btn btn-outline-secondary" onclick="testRecentEncounters()">
-              <i class="bi bi-clock me-1"></i>
-              Recent Visits
-            </button>
-            <div class="mt-3">
-              <div class="status" id="encounterStatus"></div>
-              <div class="request-response" id="encounterResponse"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Practitioner API -->
-      <div class="col-lg-6">
-        <div class="card api-card h-100">
-          <div class="card-header bg-dark text-white">
-            <h5 class="card-title mb-0">
-              <i class="bi bi-person-badge me-2"></i>
-              Practitioner API
-            </h5>
-          </div>
-          <div class="card-body">
-            <p class="card-text">Get information about healthcare providers</p>
-            <button class="btn btn-dark me-2" onclick="testPractitionerRead()">
-              <i class="bi bi-play-fill me-1"></i>
-              Get Practitioners
-            </button>
-            <button class="btn btn-outline-dark" onclick="testCurrentUser()">
-              <i class="bi bi-person-check me-1"></i>
-              Current User
-            </button>
-            <div class="mt-3">
-              <div class="status" id="practitionerStatus"></div>
-              <div class="request-response" id="practitionerResponse"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Request/Response Modal -->
-    <div class="modal fade" id="requestResponseModal" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Request & Response Details</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <ul class="nav nav-tabs" id="modalTabs">
-              <li class="nav-item">
-                <a class="nav-link active" id="request-tab" data-bs-toggle="tab" href="#request-content">Request</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="response-tab" data-bs-toggle="tab" href="#response-content">Response</a>
-              </li>
-            </ul>
-            <div class="tab-content mt-3">
-              <div class="tab-pane fade show active" id="request-content">
-                <pre id="modalRequestContent"></pre>
+        <!-- API Testing Cards - Stacked Vertically -->
+        <div class="api-sections">
+          <!-- Patient API -->
+          <div class="api-section">
+            <div class="card api-card">
+              <div class="card-header">
+                <h5 class="card-title mb-0">
+                  <button class="btn btn-link text-white text-decoration-none p-0 w-100 text-start" type="button" data-bs-toggle="collapse" data-bs-target="#patientCollapse" aria-expanded="false" aria-controls="patientCollapse">
+                    <i class="bi bi-person me-2"></i>
+                    Patient API
+                    <i class="bi bi-chevron-down float-end mt-1 collapse-icon"></i>
+                  </button>
+                </h5>
               </div>
-              <div class="tab-pane fade" id="response-content">
-                <pre id="modalResponseContent"></pre>
+              <div class="collapse" id="patientCollapse">
+                <div class="card-body">
+                  <p class="card-text text-muted">Read patient information and demographics</p>
+                  <button class="btn btn-primary-custom me-2" onclick="testPatientRead()">
+                    <i class="bi bi-play-fill me-1"></i>
+                    Test Patient Read
+                  </button>
+                  <button class="btn btn-outline-primary-custom" onclick="testPatientSearch()">
+                    <i class="bi bi-search me-1"></i>
+                    Search Patients
+                  </button>
+                  <div class="mt-3">
+                    <div class="status" id="patientStatus"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Observation API -->
+          <div class="api-section">
+            <div class="card api-card">
+              <div class="card-header">
+                <h5 class="card-title mb-0">
+                  <button class="btn btn-link text-white text-decoration-none p-0 w-100 text-start" type="button" data-bs-toggle="collapse" data-bs-target="#observationCollapse" aria-expanded="false" aria-controls="observationCollapse">
+                    <i class="bi bi-graph-up me-2"></i>
+                    Observation API
+                    <i class="bi bi-chevron-down float-end mt-1 collapse-icon"></i>
+                  </button>
+                </h5>
+              </div>
+              <div class="collapse" id="observationCollapse">
+                <div class="card-body">
+                  <p class="card-text text-muted">Retrieve patient observations and vital signs</p>
+                  <button class="btn btn-primary-custom me-2" onclick="testObservationRead()">
+                    <i class="bi bi-play-fill me-1"></i>
+                    Get Observations
+                  </button>
+                  <button class="btn btn-outline-primary-custom" onclick="testVitalSigns()">
+                    <i class="bi bi-heart-pulse me-1"></i>
+                    Vital Signs
+                  </button>
+                  <div class="mt-3">
+                    <div class="status" id="observationStatus"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Condition API -->
+          <div class="api-section">
+            <div class="card api-card">
+              <div class="card-header">
+                <h5 class="card-title mb-0">
+                  <button class="btn btn-link text-white text-decoration-none p-0 w-100 text-start" type="button" data-bs-toggle="collapse" data-bs-target="#conditionCollapse" aria-expanded="false" aria-controls="conditionCollapse">
+                    <i class="bi bi-clipboard-pulse me-2"></i>
+                    Condition API
+                    <i class="bi bi-chevron-down float-end mt-1 collapse-icon"></i>
+                  </button>
+                </h5>
+              </div>
+              <div class="collapse" id="conditionCollapse">
+                <div class="card-body">
+                  <p class="card-text text-muted">Access patient conditions and diagnoses</p>
+                  <button class="btn btn-primary-custom me-2" onclick="testConditionRead()">
+                    <i class="bi bi-play-fill me-1"></i>
+                    Get Conditions
+                  </button>
+                  <button class="btn btn-outline-primary-custom" onclick="testActiveConditions()">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    Active Only
+                  </button>
+                  <div class="mt-3">
+                    <div class="status" id="conditionStatus"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Medication API -->
+          <div class="api-section">
+            <div class="card api-card">
+              <div class="card-header">
+                <h5 class="card-title mb-0">
+                  <button class="btn btn-link text-white text-decoration-none p-0 w-100 text-start" type="button" data-bs-toggle="collapse" data-bs-target="#medicationCollapse" aria-expanded="false" aria-controls="medicationCollapse">
+                    <i class="bi bi-capsule me-2"></i>
+                    Medication API
+                    <i class="bi bi-chevron-down float-end mt-1 collapse-icon"></i>
+                  </button>
+                </h5>
+              </div>
+              <div class="collapse" id="medicationCollapse">
+                <div class="card-body">
+                  <p class="card-text text-muted">Review patient medications and prescriptions</p>
+                  <button class="btn btn-primary-custom me-2" onclick="testMedicationRead()">
+                    <i class="bi bi-play-fill me-1"></i>
+                    Get Medications
+                  </button>
+                  <button class="btn btn-outline-primary-custom" onclick="testMedicationRequests()">
+                    <i class="bi bi-prescription2 me-1"></i>
+                    Prescriptions
+                  </button>
+                  <div class="mt-3">
+                    <div class="status" id="medicationStatus"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Encounter API -->
+          <div class="api-section">
+            <div class="card api-card">
+              <div class="card-header">
+                <h5 class="card-title mb-0">
+                  <button class="btn btn-link text-white text-decoration-none p-0 w-100 text-start" type="button" data-bs-toggle="collapse" data-bs-target="#encounterCollapse" aria-expanded="false" aria-controls="encounterCollapse">
+                    <i class="bi bi-hospital me-2"></i>
+                    Encounter API
+                    <i class="bi bi-chevron-down float-end mt-1 collapse-icon"></i>
+                  </button>
+                </h5>
+              </div>
+              <div class="collapse" id="encounterCollapse">
+                <div class="card-body">
+                  <p class="card-text text-muted">Access patient encounters and visits</p>
+                  <button class="btn btn-primary-custom me-2" onclick="testEncounterRead()">
+                    <i class="bi bi-play-fill me-1"></i>
+                    Get Encounters
+                  </button>
+                  <button class="btn btn-outline-primary-custom" onclick="testRecentEncounters()">
+                    <i class="bi bi-clock me-1"></i>
+                    Recent Visits
+                  </button>
+                  <div class="mt-3">
+                    <div class="status" id="encounterStatus"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Practitioner API -->
+          <div class="api-section">
+            <div class="card api-card">
+              <div class="card-header">
+                <h5 class="card-title mb-0">
+                  <button class="btn btn-link text-white text-decoration-none p-0 w-100 text-start" type="button" data-bs-toggle="collapse" data-bs-target="#practitionerCollapse" aria-expanded="false" aria-controls="practitionerCollapse">
+                    <i class="bi bi-person-badge me-2"></i>
+                    Practitioner API
+                    <i class="bi bi-chevron-down float-end mt-1 collapse-icon"></i>
+                  </button>
+                </h5>
+              </div>
+              <div class="collapse" id="practitionerCollapse">
+                <div class="card-body">
+                  <p class="card-text text-muted">Get information about healthcare providers</p>
+                  <button class="btn btn-primary-custom me-2" onclick="testPractitionerRead()">
+                    <i class="bi bi-play-fill me-1"></i>
+                    Get Practitioners
+                  </button>
+                  <button class="btn btn-outline-primary-custom" onclick="testCurrentUser()">
+                    <i class="bi bi-person-check me-1"></i>
+                    Current User
+                  </button>
+                  <div class="mt-3">
+                    <div class="status" id="practitionerStatus"></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -300,6 +357,29 @@
       $('#statusText').html('<i class="bi bi-x-circle me-2"></i>FHIR client initialization failed: ' + error.message);
     });
 
+    // Handle collapse icon rotation
+    $('[data-bs-toggle="collapse"]').on('click', function() {
+      const icon = $(this).find('.collapse-icon');
+      const target = $($(this).data('bs-target'));
+      
+      if (target.hasClass('show')) {
+        icon.removeClass('rotated');
+      } else {
+        icon.addClass('rotated');
+      }
+    });
+
+    // Handle collapse events to ensure icon state is correct
+    $('.collapse').on('shown.bs.collapse', function() {
+      const button = $(`[data-bs-target="#${this.id}"]`);
+      button.find('.collapse-icon').addClass('rotated');
+    });
+
+    $('.collapse').on('hidden.bs.collapse', function() {
+      const button = $(`[data-bs-target="#${this.id}"]`);
+      button.find('.collapse-icon').removeClass('rotated');
+    });
+
     // Utility functions
     function getPatientName(patient) {
       if (patient.name && patient.name[0]) {
@@ -319,41 +399,6 @@
       statusElement.html(`<i class="bi bi-${icon} me-1"></i>${message}`);
     }
 
-    function displayResponse(elementId, request, response, error = null) {
-      const responseElement = $(`#${elementId}Response`);
-      
-      if (error) {
-        responseElement.html(`
-          <div class="mt-2">
-            <strong class="text-danger">Error:</strong>
-            <pre class="text-danger">${JSON.stringify(error, null, 2)}</pre>
-            <button class="btn btn-sm btn-outline-secondary mt-2" onclick="showRequestResponse('${request}', '${JSON.stringify(error, null, 2)}')">
-              <i class="bi bi-eye me-1"></i>View Details
-            </button>
-          </div>
-        `);
-      } else {
-        const summary = typeof response === 'object' ? 
-          `${response.resourceType || 'Resource'} (${response.total !== undefined ? response.total + ' entries' : 'Single resource'})` :
-          'Response received';
-          
-        responseElement.html(`
-          <div class="mt-2">
-            <strong class="text-success">Success:</strong> ${summary}
-            <button class="btn btn-sm btn-outline-primary mt-2" onclick="showRequestResponse('${request}', '${JSON.stringify(response, null, 2)}')">
-              <i class="bi bi-eye me-1"></i>View Details
-            </button>
-          </div>
-        `);
-      }
-    }
-
-    function showRequestResponse(request, response) {
-      $('#modalRequestContent').text(request);
-      $('#modalResponseContent').text(response);
-      new bootstrap.Modal(document.getElementById('requestResponseModal')).show();
-    }
-
     // API Test Functions
     async function testPatientRead() {
       updateStatus('patient', 'loading', 'Reading patient data...');
@@ -363,10 +408,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/Patient/${patient.id}`;
         
         updateStatus('patient', 'success', `Patient loaded: ${getPatientName(patient)}`);
-        displayResponse('patient', request, patient);
       } catch (error) {
         updateStatus('patient', 'error', 'Failed to read patient');
-        displayResponse('patient', 'GET /Patient/[id]', null, error);
       }
     }
 
@@ -378,10 +421,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/Patient?_count=5`;
         
         updateStatus('patient', 'success', `Found ${response.total || response.entry?.length || 0} patients`);
-        displayResponse('patient', request, response);
       } catch (error) {
         updateStatus('patient', 'error', 'Failed to search patients');
-        displayResponse('patient', 'GET /Patient?_count=5', null, error);
       }
     }
 
@@ -398,10 +439,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/Observation?patient=${currentPatientId}&_count=10`;
         
         updateStatus('observation', 'success', `Found ${response.total || response.entry?.length || 0} observations`);
-        displayResponse('observation', request, response);
       } catch (error) {
         updateStatus('observation', 'error', 'Failed to load observations');
-        displayResponse('observation', `GET /Observation?patient=${currentPatientId}`, null, error);
       }
     }
 
@@ -418,10 +457,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/Observation?patient=${currentPatientId}&category=vital-signs&_count=10`;
         
         updateStatus('observation', 'success', `Found ${response.total || response.entry?.length || 0} vital signs`);
-        displayResponse('observation', request, response);
       } catch (error) {
         updateStatus('observation', 'error', 'Failed to load vital signs');
-        displayResponse('observation', `GET /Observation?patient=${currentPatientId}&category=vital-signs`, null, error);
       }
     }
 
@@ -438,10 +475,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/Condition?patient=${currentPatientId}&_count=10`;
         
         updateStatus('condition', 'success', `Found ${response.total || response.entry?.length || 0} conditions`);
-        displayResponse('condition', request, response);
       } catch (error) {
         updateStatus('condition', 'error', 'Failed to load conditions');
-        displayResponse('condition', `GET /Condition?patient=${currentPatientId}`, null, error);
       }
     }
 
@@ -458,10 +493,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/Condition?patient=${currentPatientId}&clinical-status=active&_count=10`;
         
         updateStatus('condition', 'success', `Found ${response.total || response.entry?.length || 0} active conditions`);
-        displayResponse('condition', request, response);
       } catch (error) {
         updateStatus('condition', 'error', 'Failed to load active conditions');
-        displayResponse('condition', `GET /Condition?patient=${currentPatientId}&clinical-status=active`, null, error);
       }
     }
 
@@ -478,10 +511,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/MedicationStatement?patient=${currentPatientId}&_count=10`;
         
         updateStatus('medication', 'success', `Found ${response.total || response.entry?.length || 0} medications`);
-        displayResponse('medication', request, response);
       } catch (error) {
         updateStatus('medication', 'error', 'Failed to load medications');
-        displayResponse('medication', `GET /MedicationStatement?patient=${currentPatientId}`, null, error);
       }
     }
 
@@ -498,10 +529,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/MedicationRequest?patient=${currentPatientId}&_count=10`;
         
         updateStatus('medication', 'success', `Found ${response.total || response.entry?.length || 0} prescriptions`);
-        displayResponse('medication', request, response);
       } catch (error) {
         updateStatus('medication', 'error', 'Failed to load prescriptions');
-        displayResponse('medication', `GET /MedicationRequest?patient=${currentPatientId}`, null, error);
       }
     }
 
@@ -518,10 +547,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/Encounter?patient=${currentPatientId}&_count=10`;
         
         updateStatus('encounter', 'success', `Found ${response.total || response.entry?.length || 0} encounters`);
-        displayResponse('encounter', request, response);
       } catch (error) {
         updateStatus('encounter', 'error', 'Failed to load encounters');
-        displayResponse('encounter', `GET /Encounter?patient=${currentPatientId}`, null, error);
       }
     }
 
@@ -538,10 +565,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/Encounter?patient=${currentPatientId}&_sort=-date&_count=5`;
         
         updateStatus('encounter', 'success', `Found ${response.total || response.entry?.length || 0} recent encounters`);
-        displayResponse('encounter', request, response);
       } catch (error) {
         updateStatus('encounter', 'error', 'Failed to load recent encounters');
-        displayResponse('encounter', `GET /Encounter?patient=${currentPatientId}&_sort=-date`, null, error);
       }
     }
 
@@ -553,10 +578,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/Practitioner?_count=5`;
         
         updateStatus('practitioner', 'success', `Found ${response.total || response.entry?.length || 0} practitioners`);
-        displayResponse('practitioner', request, response);
       } catch (error) {
         updateStatus('practitioner', 'error', 'Failed to load practitioners');
-        displayResponse('practitioner', 'GET /Practitioner?_count=5', null, error);
       }
     }
 
@@ -568,10 +591,8 @@
         const request = `GET ${fhirClient.state.serverUrl}/${user.resourceType}/${user.id}`;
         
         updateStatus('practitioner', 'success', `Current user: ${user.resourceType}`);
-        displayResponse('practitioner', request, user);
       } catch (error) {
         updateStatus('practitioner', 'error', 'Failed to load current user');
-        displayResponse('practitioner', 'GET /[User Resource]', null, error);
       }
     }
   </script>
