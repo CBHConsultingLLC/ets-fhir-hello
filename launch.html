@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Launch - Hello FHIR (Oracle Health)</title>
+  <!-- SMART browser library -->
+  <script src="https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.min.js"></script>
+</head>
+<body>
+  <h1>Launching...</h1>
+  <script>
+    // Replace with your client id after registration
+    const CLIENT_ID = "REPLACE_ME";
+
+    // The SMART library will read 'iss' & 'launch' from the querystring
+    // when launched from the EHR or from the SMART Launcher.
+    FHIR.oauth2.authorize({
+      clientId: CLIENT_ID,
+      // request patient read + user identity; add others as needed
+      scope: "launch openid fhirUser patient/Patient.read online_access",
+      // where the auth server should send the browser back to
+      redirectUri: "app.html"
+    });
+  </script>
+</body>
+</html>
