@@ -1,0 +1,13 @@
+# Logs
+*.log
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Build outputs (if using bundlers later)
+dist/
+build/
+
+# Node (if you eventually use npm tooling)
+node_modules/
