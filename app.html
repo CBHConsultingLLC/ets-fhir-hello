@@ -1,28 +1,579 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Hello FHIR - Oracle Health</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FHIR API Testing Dashboard - Oracle Health</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- FHIR Client -->
   <script src="https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.min.js"></script>
-  <style>body{font:16px system-ui, sans-serif;margin:2rem}</style>
+  <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <style>
+    .api-card {
+      transition: transform 0.2s ease-in-out;
+    }
+    .api-card:hover {
+      transform: translateY(-2px);
+    }
+    .request-response {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .status-success {
+      color: #198754;
+    }
+    .status-error {
+      color: #dc3545;
+    }
+    .status-loading {
+      color: #0d6efd;
+    }
+    pre {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      padding: 1rem;
+      font-size: 0.875rem;
+    }
+  </style>
 </head>
 <body>
-  <h1 id="hello">Loading patient…</h1>
-  <pre id="debug" style="white-space:pre-wrap"></pre>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="bi bi-heart-pulse me-2"></i>
+        FHIR API Testing Dashboard
+      </a>
+      <span class="navbar-text" id="userInfo">
+        <i class="bi bi-person-circle me-1"></i>
+        Loading user...
+      </span>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <!-- Connection Status -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="alert alert-info" role="alert" id="connectionStatus">
+          <i class="bi bi-wifi me-2"></i>
+          <span id="statusText">Connecting to FHIR server...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- API Testing Cards -->
+    <div class="row g-4">
+      <!-- Patient API -->
+      <div class="col-lg-6">
+        <div class="card api-card h-100">
+          <div class="card-header bg-success text-white">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-person me-2"></i>
+              Patient API
+            </h5>
+          </div>
+          <div class="card-body">
+            <p class="card-text">Read patient information and demographics</p>
+            <button class="btn btn-success me-2" onclick="testPatientRead()">
+              <i class="bi bi-play-fill me-1"></i>
+              Test Patient Read
+            </button>
+            <button class="btn btn-outline-success" onclick="testPatientSearch()">
+              <i class="bi bi-search me-1"></i>
+              Search Patients
+            </button>
+            <div class="mt-3">
+              <div class="status" id="patientStatus"></div>
+              <div class="request-response" id="patientResponse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Observation API -->
+      <div class="col-lg-6">
+        <div class="card api-card h-100">
+          <div class="card-header bg-info text-white">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-graph-up me-2"></i>
+              Observation API
+            </h5>
+          </div>
+          <div class="card-body">
+            <p class="card-text">Retrieve patient observations and vital signs</p>
+            <button class="btn btn-info me-2" onclick="testObservationRead()">
+              <i class="bi bi-play-fill me-1"></i>
+              Get Observations
+            </button>
+            <button class="btn btn-outline-info" onclick="testVitalSigns()">
+              <i class="bi bi-heart-pulse me-1"></i>
+              Vital Signs
+            </button>
+            <div class="mt-3">
+              <div class="status" id="observationStatus"></div>
+              <div class="request-response" id="observationResponse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Condition API -->
+      <div class="col-lg-6">
+        <div class="card api-card h-100">
+          <div class="card-header bg-warning text-dark">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-clipboard-pulse me-2"></i>
+              Condition API
+            </h5>
+          </div>
+          <div class="card-body">
+            <p class="card-text">Access patient conditions and diagnoses</p>
+            <button class="btn btn-warning me-2" onclick="testConditionRead()">
+              <i class="bi bi-play-fill me-1"></i>
+              Get Conditions
+            </button>
+            <button class="btn btn-outline-warning" onclick="testActiveConditions()">
+              <i class="bi bi-exclamation-triangle me-1"></i>
+              Active Only
+            </button>
+            <div class="mt-3">
+              <div class="status" id="conditionStatus"></div>
+              <div class="request-response" id="conditionResponse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medication API -->
+      <div class="col-lg-6">
+        <div class="card api-card h-100">
+          <div class="card-header bg-danger text-white">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-capsule me-2"></i>
+              Medication API
+            </h5>
+          </div>
+          <div class="card-body">
+            <p class="card-text">Review patient medications and prescriptions</p>
+            <button class="btn btn-danger me-2" onclick="testMedicationRead()">
+              <i class="bi bi-play-fill me-1"></i>
+              Get Medications
+            </button>
+            <button class="btn btn-outline-danger" onclick="testMedicationRequests()">
+              <i class="bi bi-prescription2 me-1"></i>
+              Prescriptions
+            </button>
+            <div class="mt-3">
+              <div class="status" id="medicationStatus"></div>
+              <div class="request-response" id="medicationResponse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Encounter API -->
+      <div class="col-lg-6">
+        <div class="card api-card h-100">
+          <div class="card-header bg-secondary text-white">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-hospital me-2"></i>
+              Encounter API
+            </h5>
+          </div>
+          <div class="card-body">
+            <p class="card-text">Access patient encounters and visits</p>
+            <button class="btn btn-secondary me-2" onclick="testEncounterRead()">
+              <i class="bi bi-play-fill me-1"></i>
+              Get Encounters
+            </button>
+            <button class="btn btn-outline-secondary" onclick="testRecentEncounters()">
+              <i class="bi bi-clock me-1"></i>
+              Recent Visits
+            </button>
+            <div class="mt-3">
+              <div class="status" id="encounterStatus"></div>
+              <div class="request-response" id="encounterResponse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Practitioner API -->
+      <div class="col-lg-6">
+        <div class="card api-card h-100">
+          <div class="card-header bg-dark text-white">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-person-badge me-2"></i>
+              Practitioner API
+            </h5>
+          </div>
+          <div class="card-body">
+            <p class="card-text">Get information about healthcare providers</p>
+            <button class="btn btn-dark me-2" onclick="testPractitionerRead()">
+              <i class="bi bi-play-fill me-1"></i>
+              Get Practitioners
+            </button>
+            <button class="btn btn-outline-dark" onclick="testCurrentUser()">
+              <i class="bi bi-person-check me-1"></i>
+              Current User
+            </button>
+            <div class="mt-3">
+              <div class="status" id="practitionerStatus"></div>
+              <div class="request-response" id="practitionerResponse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Request/Response Modal -->
+    <div class="modal fade" id="requestResponseModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Request & Response Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <ul class="nav nav-tabs" id="modalTabs">
+              <li class="nav-item">
+                <a class="nav-link active" id="request-tab" data-bs-toggle="tab" href="#request-content">Request</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="response-tab" data-bs-toggle="tab" href="#response-content">Response</a>
+              </li>
+            </ul>
+            <div class="tab-content mt-3">
+              <div class="tab-pane fade show active" id="request-content">
+                <pre id="modalRequestContent"></pre>
+              </div>
+              <div class="tab-pane fade" id="response-content">
+                <pre id="modalResponseContent"></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
+    let fhirClient = null;
+    let currentPatientId = null;
+
+    // Initialize FHIR client
     FHIR.oauth2.ready().then(async client => {
+      fhirClient = client;
+      
       try {
-        // Try to read the patient in context
-        const p = await client.patient.read();
-        const name = (p.name && p.name[0]) ? [p.name[0].given?.[0], p.name[0].family].filter(Boolean).join(" ") : "patient";
-        document.getElementById("hello").textContent = `Hello, ${name}!`;
-      } catch (e) {
-        // Fallback: show who is logged in, if no patient context
-        const user = await client.user.read().catch(()=>null);
-        document.getElementById("hello").textContent = `Hello, ${user?.resourceType || "FHIR user"}!`;
-        document.getElementById("debug").textContent = String(e);
+        // Get user information
+        const user = await client.user.read().catch(() => null);
+        const patient = await client.patient.read().catch(() => null);
+        
+        if (patient) {
+          currentPatientId = patient.id;
+          const name = getPatientName(patient);
+          $('#userInfo').html(`<i class="bi bi-person-circle me-1"></i>Patient: ${name}`);
+        } else if (user) {
+          $('#userInfo').html(`<i class="bi bi-person-badge me-1"></i>User: ${user.resourceType}`);
+        }
+
+        // Update connection status
+        $('#connectionStatus').removeClass('alert-info').addClass('alert-success');
+        $('#statusText').html('<i class="bi bi-check-circle me-2"></i>Connected to FHIR server successfully');
+        
+      } catch (error) {
+        $('#connectionStatus').removeClass('alert-info').addClass('alert-danger');
+        $('#statusText').html('<i class="bi bi-exclamation-triangle me-2"></i>Connection failed: ' + error.message);
       }
+    }).catch(error => {
+      $('#connectionStatus').removeClass('alert-info').addClass('alert-danger');
+      $('#statusText').html('<i class="bi bi-x-circle me-2"></i>FHIR client initialization failed: ' + error.message);
     });
+
+    // Utility functions
+    function getPatientName(patient) {
+      if (patient.name && patient.name[0]) {
+        const given = patient.name[0].given ? patient.name[0].given.join(' ') : '';
+        const family = patient.name[0].family || '';
+        return [given, family].filter(Boolean).join(' ') || 'Unknown Patient';
+      }
+      return 'Unknown Patient';
+    }
+
+    function updateStatus(elementId, status, message) {
+      const statusElement = $(`#${elementId}Status`);
+      statusElement.removeClass('status-success status-error status-loading');
+      statusElement.addClass(`status-${status}`);
+      
+      const icon = status === 'success' ? 'check-circle' : status === 'error' ? 'x-circle' : 'hourglass-split';
+      statusElement.html(`<i class="bi bi-${icon} me-1"></i>${message}`);
+    }
+
+    function displayResponse(elementId, request, response, error = null) {
+      const responseElement = $(`#${elementId}Response`);
+      
+      if (error) {
+        responseElement.html(`
+          <div class="mt-2">
+            <strong class="text-danger">Error:</strong>
+            <pre class="text-danger">${JSON.stringify(error, null, 2)}</pre>
+            <button class="btn btn-sm btn-outline-secondary mt-2" onclick="showRequestResponse('${request}', '${JSON.stringify(error, null, 2)}')">
+              <i class="bi bi-eye me-1"></i>View Details
+            </button>
+          </div>
+        `);
+      } else {
+        const summary = typeof response === 'object' ? 
+          `${response.resourceType || 'Resource'} (${response.total !== undefined ? response.total + ' entries' : 'Single resource'})` :
+          'Response received';
+          
+        responseElement.html(`
+          <div class="mt-2">
+            <strong class="text-success">Success:</strong> ${summary}
+            <button class="btn btn-sm btn-outline-primary mt-2" onclick="showRequestResponse('${request}', '${JSON.stringify(response, null, 2)}')">
+              <i class="bi bi-eye me-1"></i>View Details
+            </button>
+          </div>
+        `);
+      }
+    }
+
+    function showRequestResponse(request, response) {
+      $('#modalRequestContent').text(request);
+      $('#modalResponseContent').text(response);
+      new bootstrap.Modal(document.getElementById('requestResponseModal')).show();
+    }
+
+    // API Test Functions
+    async function testPatientRead() {
+      updateStatus('patient', 'loading', 'Reading patient data...');
+      
+      try {
+        const patient = await fhirClient.patient.read();
+        const request = `GET ${fhirClient.state.serverUrl}/Patient/${patient.id}`;
+        
+        updateStatus('patient', 'success', `Patient loaded: ${getPatientName(patient)}`);
+        displayResponse('patient', request, patient);
+      } catch (error) {
+        updateStatus('patient', 'error', 'Failed to read patient');
+        displayResponse('patient', 'GET /Patient/[id]', null, error);
+      }
+    }
+
+    async function testPatientSearch() {
+      updateStatus('patient', 'loading', 'Searching patients...');
+      
+      try {
+        const response = await fhirClient.request('Patient?_count=5');
+        const request = `GET ${fhirClient.state.serverUrl}/Patient?_count=5`;
+        
+        updateStatus('patient', 'success', `Found ${response.total || response.entry?.length || 0} patients`);
+        displayResponse('patient', request, response);
+      } catch (error) {
+        updateStatus('patient', 'error', 'Failed to search patients');
+        displayResponse('patient', 'GET /Patient?_count=5', null, error);
+      }
+    }
+
+    async function testObservationRead() {
+      if (!currentPatientId) {
+        updateStatus('observation', 'error', 'No patient context available');
+        return;
+      }
+      
+      updateStatus('observation', 'loading', 'Loading observations...');
+      
+      try {
+        const response = await fhirClient.request(`Observation?patient=${currentPatientId}&_count=10`);
+        const request = `GET ${fhirClient.state.serverUrl}/Observation?patient=${currentPatientId}&_count=10`;
+        
+        updateStatus('observation', 'success', `Found ${response.total || response.entry?.length || 0} observations`);
+        displayResponse('observation', request, response);
+      } catch (error) {
+        updateStatus('observation', 'error', 'Failed to load observations');
+        displayResponse('observation', `GET /Observation?patient=${currentPatientId}`, null, error);
+      }
+    }
+
+    async function testVitalSigns() {
+      if (!currentPatientId) {
+        updateStatus('observation', 'error', 'No patient context available');
+        return;
+      }
+      
+      updateStatus('observation', 'loading', 'Loading vital signs...');
+      
+      try {
+        const response = await fhirClient.request(`Observation?patient=${currentPatientId}&category=vital-signs&_count=10`);
+        const request = `GET ${fhirClient.state.serverUrl}/Observation?patient=${currentPatientId}&category=vital-signs&_count=10`;
+        
+        updateStatus('observation', 'success', `Found ${response.total || response.entry?.length || 0} vital signs`);
+        displayResponse('observation', request, response);
+      } catch (error) {
+        updateStatus('observation', 'error', 'Failed to load vital signs');
+        displayResponse('observation', `GET /Observation?patient=${currentPatientId}&category=vital-signs`, null, error);
+      }
+    }
+
+    async function testConditionRead() {
+      if (!currentPatientId) {
+        updateStatus('condition', 'error', 'No patient context available');
+        return;
+      }
+      
+      updateStatus('condition', 'loading', 'Loading conditions...');
+      
+      try {
+        const response = await fhirClient.request(`Condition?patient=${currentPatientId}&_count=10`);
+        const request = `GET ${fhirClient.state.serverUrl}/Condition?patient=${currentPatientId}&_count=10`;
+        
+        updateStatus('condition', 'success', `Found ${response.total || response.entry?.length || 0} conditions`);
+        displayResponse('condition', request, response);
+      } catch (error) {
+        updateStatus('condition', 'error', 'Failed to load conditions');
+        displayResponse('condition', `GET /Condition?patient=${currentPatientId}`, null, error);
+      }
+    }
+
+    async function testActiveConditions() {
+      if (!currentPatientId) {
+        updateStatus('condition', 'error', 'No patient context available');
+        return;
+      }
+      
+      updateStatus('condition', 'loading', 'Loading active conditions...');
+      
+      try {
+        const response = await fhirClient.request(`Condition?patient=${currentPatientId}&clinical-status=active&_count=10`);
+        const request = `GET ${fhirClient.state.serverUrl}/Condition?patient=${currentPatientId}&clinical-status=active&_count=10`;
+        
+        updateStatus('condition', 'success', `Found ${response.total || response.entry?.length || 0} active conditions`);
+        displayResponse('condition', request, response);
+      } catch (error) {
+        updateStatus('condition', 'error', 'Failed to load active conditions');
+        displayResponse('condition', `GET /Condition?patient=${currentPatientId}&clinical-status=active`, null, error);
+      }
+    }
+
+    async function testMedicationRead() {
+      if (!currentPatientId) {
+        updateStatus('medication', 'error', 'No patient context available');
+        return;
+      }
+      
+      updateStatus('medication', 'loading', 'Loading medications...');
+      
+      try {
+        const response = await fhirClient.request(`MedicationStatement?patient=${currentPatientId}&_count=10`);
+        const request = `GET ${fhirClient.state.serverUrl}/MedicationStatement?patient=${currentPatientId}&_count=10`;
+        
+        updateStatus('medication', 'success', `Found ${response.total || response.entry?.length || 0} medications`);
+        displayResponse('medication', request, response);
+      } catch (error) {
+        updateStatus('medication', 'error', 'Failed to load medications');
+        displayResponse('medication', `GET /MedicationStatement?patient=${currentPatientId}`, null, error);
+      }
+    }
+
+    async function testMedicationRequests() {
+      if (!currentPatientId) {
+        updateStatus('medication', 'error', 'No patient context available');
+        return;
+      }
+      
+      updateStatus('medication', 'loading', 'Loading medication requests...');
+      
+      try {
+        const response = await fhirClient.request(`MedicationRequest?patient=${currentPatientId}&_count=10`);
+        const request = `GET ${fhirClient.state.serverUrl}/MedicationRequest?patient=${currentPatientId}&_count=10`;
+        
+        updateStatus('medication', 'success', `Found ${response.total || response.entry?.length || 0} prescriptions`);
+        displayResponse('medication', request, response);
+      } catch (error) {
+        updateStatus('medication', 'error', 'Failed to load prescriptions');
+        displayResponse('medication', `GET /MedicationRequest?patient=${currentPatientId}`, null, error);
+      }
+    }
+
+    async function testEncounterRead() {
+      if (!currentPatientId) {
+        updateStatus('encounter', 'error', 'No patient context available');
+        return;
+      }
+      
+      updateStatus('encounter', 'loading', 'Loading encounters...');
+      
+      try {
+        const response = await fhirClient.request(`Encounter?patient=${currentPatientId}&_count=10`);
+        const request = `GET ${fhirClient.state.serverUrl}/Encounter?patient=${currentPatientId}&_count=10`;
+        
+        updateStatus('encounter', 'success', `Found ${response.total || response.entry?.length || 0} encounters`);
+        displayResponse('encounter', request, response);
+      } catch (error) {
+        updateStatus('encounter', 'error', 'Failed to load encounters');
+        displayResponse('encounter', `GET /Encounter?patient=${currentPatientId}`, null, error);
+      }
+    }
+
+    async function testRecentEncounters() {
+      if (!currentPatientId) {
+        updateStatus('encounter', 'error', 'No patient context available');
+        return;
+      }
+      
+      updateStatus('encounter', 'loading', 'Loading recent encounters...');
+      
+      try {
+        const response = await fhirClient.request(`Encounter?patient=${currentPatientId}&_sort=-date&_count=5`);
+        const request = `GET ${fhirClient.state.serverUrl}/Encounter?patient=${currentPatientId}&_sort=-date&_count=5`;
+        
+        updateStatus('encounter', 'success', `Found ${response.total || response.entry?.length || 0} recent encounters`);
+        displayResponse('encounter', request, response);
+      } catch (error) {
+        updateStatus('encounter', 'error', 'Failed to load recent encounters');
+        displayResponse('encounter', `GET /Encounter?patient=${currentPatientId}&_sort=-date`, null, error);
+      }
+    }
+
+    async function testPractitionerRead() {
+      updateStatus('practitioner', 'loading', 'Loading practitioners...');
+      
+      try {
+        const response = await fhirClient.request('Practitioner?_count=5');
+        const request = `GET ${fhirClient.state.serverUrl}/Practitioner?_count=5`;
+        
+        updateStatus('practitioner', 'success', `Found ${response.total || response.entry?.length || 0} practitioners`);
+        displayResponse('practitioner', request, response);
+      } catch (error) {
+        updateStatus('practitioner', 'error', 'Failed to load practitioners');
+        displayResponse('practitioner', 'GET /Practitioner?_count=5', null, error);
+      }
+    }
+
+    async function testCurrentUser() {
+      updateStatus('practitioner', 'loading', 'Loading current user...');
+      
+      try {
+        const user = await fhirClient.user.read();
+        const request = `GET ${fhirClient.state.serverUrl}/${user.resourceType}/${user.id}`;
+        
+        updateStatus('practitioner', 'success', `Current user: ${user.resourceType}`);
+        displayResponse('practitioner', request, user);
+      } catch (error) {
+        updateStatus('practitioner', 'error', 'Failed to load current user');
+        displayResponse('practitioner', 'GET /[User Resource]', null, error);
+      }
+    }
   </script>
 </body>
 </html>
