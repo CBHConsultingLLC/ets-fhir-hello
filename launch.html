@@ -16,9 +16,7 @@
     // when launched from the EHR or from the SMART Launcher.
     FHIR.oauth2.authorize({
       clientId: CLIENT_ID,
-      // request patient read + user identity; add others as needed
       scope: "launch openid fhirUser patient/Patient.read online_access",
-      // where the auth server should send the browser back to
       redirectUri: "app.html"
     });
   </script>
