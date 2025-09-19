@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Hello FHIR - Oracle Health</title>
+  <script src="https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.min.js"></script>
+  <style>body{font:16px system-ui, sans-serif;margin:2rem}</style>
+</head>
+<body>
+  <h1 id="hello">Loading patient…</h1>
+  <pre id="debug" style="white-space:pre-wrap"></pre>
+  <script>
+    FHIR.oauth2.ready().then(async client => {
+      try {
+        // Try to read the patient in context
+        const p = await client.patient.read();
+        const name = (p.name && p.name[0]) ? [p.name[0].given?.[0], p.name[0].family].filter(Boolean).join(" ") : "patient";
+        document.getElementById("hello").textContent = `Hello, ${name}!`;
+      } catch (e) {
+        // Fallback: show who is logged in, if no patient context
+        const user = await client.user.read().catch(()=>null);
+        document.getElementById("hello").textContent = `Hello, ${user?.resourceType || "FHIR user"}!`;
+        document.getElementById("debug").textContent = String(e);
+      }
+    });
+  </script>
+</body>
+</html>
