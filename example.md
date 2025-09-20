@@ -1,0 +1,57 @@
+* Standard Properties
+  * Application Type:Provider
+  * Type of Access:Online
+  * Application Privacy:Public
+
+* API Access
+  * Standard capabilities
+    * launch
+    * profile
+    * fhirUser
+    * openid
+  * User Product APIs
+    * Basic
+      * write
+    * Encounter
+      * read
+      * write
+    * Immunization
+      * read
+      * write
+    * MedicationAdministration
+      * read
+    * MedicationDispense
+      * read
+    * Patient:
+      * read
+      * write
+    * Person
+      * read
+  * Patient Product APIs
+    * AllergyIntolerance
+      * read/write
+    * Basic
+      * write
+    * Binary
+      * read
+    * DocumentReference
+      * read
+      * write
+    * Encounter
+      * read
+      * write
+    * Immunization
+      * read
+      * write
+    * MedicationAdministration
+      * read
+    * MedicationDispense
+      * read
+    * MedicationRequest
+      * read
+      * write
+    * Patient
+      * read
+      * write
+    * Person
+      * read
