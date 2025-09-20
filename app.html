@@ -115,7 +115,7 @@
         FHIR API Testing Dashboard
       </a>
       <div class="navbar-nav ms-auto d-flex flex-row">
-        <a class="nav-link text-white me-3" href="ref/oracle-fhir-swagger-ui.html" target="_blank">
+        <a class="nav-link text-white me-3" href="https://app.swaggerhub.com/apis-docs/cbhconsulingllc/fhir-r4-apis-for-oracle-health-millennium-platform/2025.08.21" target="_blank">
           <i class="bi bi-book me-1"></i>
           API Docs
         </a>
@@ -148,18 +148,18 @@
           <div class="card-body">
             <p class="card-text text-muted">Access interactive API documentation and testing interfaces</p>
             <div class="d-flex flex-wrap gap-2">
-              <a href="ref/oracle-fhir-swagger-ui.html" target="_blank" class="btn btn-primary-custom">
+              <a href="https://app.swaggerhub.com/apis-docs/cbhconsulingllc/fhir-r4-apis-for-oracle-health-millennium-platform/2025.08.21" target="_blank" class="btn btn-primary-custom">
                 <i class="bi bi-heart-pulse me-1"></i>
-                Oracle FHIR API
+                Oracle FHIR API (SwaggerHub)
               </a>
-              <a href="ref/stirling-pdf-swagger.html" target="_blank" class="btn btn-outline-primary-custom">
+              <a href="https://silver-archivist.ehrtechsolutions.com/swagger-ui/5.28.0/index.html" target="_blank" class="btn btn-outline-primary-custom">
                 <i class="bi bi-file-earmark-pdf me-1"></i>
                 Stirling PDF API
               </a>
-              <button class="btn btn-outline-primary-custom" onclick="openCustomSwagger()">
-                <i class="bi bi-link-45deg me-1"></i>
-                Custom API
-              </button>
+              <a href="https://docs.oracle.com/en/industries/health/millennium-platform-apis/mfrap/swagger.json" target="_blank" class="btn btn-outline-primary-custom">
+                <i class="bi bi-file-text me-1"></i>
+                Oracle FHIR JSON
+              </a>
             </div>
           </div>
         </div>
@@ -630,11 +630,8 @@
     }
 
     // API Documentation Functions
-    function openCustomSwagger() {
-      const url = prompt('Enter Swagger JSON URL:', 'https://api.example.com/swagger.json');
-      if (url) {
-        window.open(`ref/oracle-fhir-swagger-ui.html?url=${encodeURIComponent(url)}`, '_blank');
-      }
+    function openSwaggerHub() {
+      window.open('https://app.swaggerhub.com/apis-docs/cbhconsulingllc/fhir-r4-apis-for-oracle-health-millennium-platform/2025.08.21', '_blank');
     }
   </script>
 </body>

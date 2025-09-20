@@ -4,9 +4,9 @@ This document provides a reference to the Oracle Health Millennium Platform FHIR
 
 ## Official Documentation
 
-- **Swagger JSON**: [https://docs.oracle.com/en/industries/health/millennium-platform-apis/mfrap/swagger.json](https://docs.oracle.com/en/industries/health/millennium-platform-apis/mfrap/swagger.json)
+- **Interactive Swagger UI**: [https://app.swaggerhub.com/apis-docs/cbhconsulingllc/fhir-r4-apis-for-oracle-health-millennium-platform/2025.08.21](https://app.swaggerhub.com/apis-docs/cbhconsulingllc/fhir-r4-apis-for-oracle-health-millennium-platform/2025.08.21)
+- **Original Swagger JSON**: [https://docs.oracle.com/en/industries/health/millennium-platform-apis/mfrap/swagger.json](https://docs.oracle.com/en/industries/health/millennium-platform-apis/mfrap/swagger.json)
 - **Local Copy**: `./oracle-fhir-swagger.json`
-- **Configuration**: `./swagger-config.js`
 
 ## API Information
 
@@ -66,21 +66,20 @@ The API requires OAuth 2.0 authorization with the following scopes:
 
 ## Usage in This Project
 
-The API configuration is centralized in `swagger-config.js` and can be used throughout the application:
+Access the interactive API documentation through the following methods:
 
-```javascript
-// Get a resource endpoint
-const patientEndpoint = getResourceEndpoint('Patient', '12345');
-// Returns: https://fhir-ehr-code.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Patient/12345
+### From the Application
+1. **Navbar Link**: Click "API Docs" in the top navigation
+2. **Quick Access Card**: Click "Oracle FHIR API (SwaggerHub)" button
+3. **Direct URL**: [https://app.swaggerhub.com/apis-docs/cbhconsulingllc/fhir-r4-apis-for-oracle-health-millennium-platform/2025.08.21](https://app.swaggerhub.com/apis-docs/cbhconsulingllc/fhir-r4-apis-for-oracle-health-millennium-platform/2025.08.21)
 
-// Build query parameters
-const queryString = buildQueryString({
-  patient: '12345',
-  _count: 10,
-  category: 'vital-signs'
-});
-// Returns: patient=12345&_count=10&category=vital-signs
-```
+### SwaggerHub Features
+- **Interactive API Testing**: Try endpoints directly in the browser
+- **Request/Response Examples**: See actual data structures
+- **Schema Documentation**: Understand data models and validation rules
+- **Authentication Testing**: Test with your actual FHIR credentials
+- **Code Generation**: Generate client SDKs in multiple languages
+- **Version Management**: Track API changes and updates
 
 ## Integration with Existing Code
 
