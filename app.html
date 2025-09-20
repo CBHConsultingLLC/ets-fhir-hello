@@ -11,6 +11,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <!-- FHIR Client -->
   <script src="https://cdn.jsdelivr.net/npm/fhirclient/build/fhir-client.min.js"></script>
+  <!-- App Settings -->
+  <script src="appSettings.json" type="application/json" id="appSettings"></script>
   <!-- jQuery -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
   <!-- Bootstrap 5 JS -->
@@ -105,6 +107,105 @@
       background-color: rgba(255, 255, 255, 0.1);
       border-radius: 0.25rem;
     }
+
+    /* Application Information Styling */
+    .info-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      color: var(--primary-color);
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--light-gray);
+    }
+
+    .info-item {
+      margin-bottom: 0.75rem;
+      padding: 0.5rem 0;
+    }
+
+    .info-item label {
+      display: block;
+      font-weight: 600;
+      color: var(--dark-gray);
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 0.95rem;
+      color: var(--primary-color);
+      word-break: break-word;
+    }
+
+    .info-value code {
+      background-color: #f8f9fa;
+      color: var(--primary-color);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-outline-light {
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+    }
+
+    .btn-outline-light:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: white;
+      color: white;
+    }
+
+    /* Smooth transitions */
+    #appInfoSection {
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* API List Styling */
+    .api-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      background-color: white;
+    }
+
+    .api-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
+      background-color: #f8f9fa;
+      border-radius: 0.25rem;
+      border-left: 3px solid var(--accent-color);
+    }
+
+    .api-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .api-name {
+      font-weight: 600;
+      color: var(--primary-color);
+      font-size: 0.9rem;
+    }
+
+    .api-access {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .access-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.4rem;
+    }
   </style>
 </head>
 <body>
@@ -115,6 +216,9 @@
         FHIR API Testing Dashboard
       </a>
       <div class="navbar-nav ms-auto d-flex flex-row align-items-center">
+        <button class="btn btn-outline-light btn-sm me-3" onclick="toggleAppInfo()" id="appInfoToggle" title="Application Information">
+          <i class="bi bi-info-circle"></i>
+        </button>
         <span class="navbar-text me-3" id="connectionStatus">
           <i class="bi bi-wifi me-1"></i>
           <span id="statusText">Connecting to FHIR server...</span>
@@ -131,10 +235,321 @@
     </div>
   </nav>
 
+  <!-- App Information Section -->
+  <div class="container-fluid mt-4" id="appInfoSection" style="display: none;">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-xl-8">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h4 class="card-title mb-0">
+              <i class="bi bi-info-circle me-2"></i>
+              Application Information
+            </h4>
+          </div>
+          <div class="card-body bg-light">
+            <div class="row">
+              <!-- Basic Information -->
+              <div class="col-md-6">
+                <div class="info-section">
+                  <h6 class="section-title">
+                    <i class="bi bi-app me-2"></i>
+                    Basic Information
+                  </h6>
+                  <div class="info-item">
+                    <label>Application Name</label>
+                    <div class="info-value" id="appName">-</div>
+                  </div>
+                  <div class="info-item">
+                    <label>Owner</label>
+                    <div class="info-value" id="appOwner">-</div>
+                  </div>
+                  <div class="info-item">
+                    <label>Application ID</label>
+                    <div class="info-value">
+                      <code id="appId" class="small">-</code>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <label>Client ID</label>
+                    <div class="info-value">
+                      <code id="clientId" class="small">-</code>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <label>Application Type</label>
+                    <div class="info-value">
+                      <span class="badge bg-primary" id="appType">-</span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <label>Access Type</label>
+                    <div class="info-value">
+                      <span class="badge bg-success" id="accessType">-</span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <label>Privacy Level</label>
+                    <div class="info-value">
+                      <span class="badge bg-info" id="privacyLevel">-</span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <label>SMART Version</label>
+                    <div class="info-value">
+                      <span class="badge bg-secondary" id="smartVersion">-</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Technical Details -->
+              <div class="col-md-6">
+                <div class="info-section">
+                  <h6 class="section-title">
+                    <i class="bi bi-gear me-2"></i>
+                    Technical Details
+                  </h6>
+                  <div class="info-item">
+                    <label>FHIR Version</label>
+                    <div class="info-value">
+                      <span class="badge bg-warning text-dark" id="fhirVersion">-</span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <label>Intended Users</label>
+                    <div class="info-value" id="intendedUsers">-</div>
+                  </div>
+                  <div class="info-item">
+                    <label>Intended Purposes</label>
+                    <div class="info-value" id="intendedPurposes">-</div>
+                  </div>
+                  <div class="info-item">
+                    <label>Redirect URI</label>
+                    <div class="info-value">
+                      <code id="redirectUri" class="small text-break">-</code>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <label>Launch URI</label>
+                    <div class="info-value">
+                      <code id="launchUri" class="small text-break">-</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- API Access Summary -->
+            <hr class="my-4">
+            <div class="info-section">
+              <h6 class="section-title">
+                <i class="bi bi-shield-check me-2"></i>
+                API Access Summary
+              </h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <label>Standard Capabilities</label>
+                    <div class="info-value" id="standardCapabilities">-</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <label>Product Family</label>
+                    <div class="info-value">
+                      <span class="badge bg-primary" id="productFamily">-</span>
+                    </div>
+                  </div>
+                  <div class="info-item">
+                    <label>Products</label>
+                    <div class="info-value" id="products">-</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- API Access Details -->
+            <hr class="my-4">
+            <div class="info-section">
+              <h6 class="section-title">
+                <i class="bi bi-list-ul me-2"></i>
+                API Access Details
+              </h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <h6 class="text-secondary mb-3">
+                    <i class="bi bi-person-badge me-2"></i>
+                    User Product APIs
+                  </h6>
+                  <div class="api-list" id="userProductAPIs">-</div>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="text-secondary mb-3">
+                    <i class="bi bi-person me-2"></i>
+                    Patient Product APIs
+                  </h6>
+                  <div class="api-list" id="patientProductAPIs">-</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Links -->
+            <hr class="my-4">
+            <div class="info-section">
+              <h6 class="section-title">
+                <i class="bi bi-link-45deg me-2"></i>
+                Important Links
+              </h6>
+              <div class="d-flex flex-wrap gap-2">
+                <a href="#" id="privacyPolicyLink" class="btn btn-outline-primary btn-sm" target="_blank">
+                  <i class="bi bi-shield-lock me-1"></i>
+                  Privacy Policy
+                </a>
+                <a href="#" id="termsOfServiceLink" class="btn btn-outline-primary btn-sm" target="_blank">
+                  <i class="bi bi-file-text me-1"></i>
+                  Terms of Service
+                </a>
+                <a href="#" id="technicalSupportLink" class="btn btn-outline-primary btn-sm" target="_blank">
+                  <i class="bi bi-headset me-1"></i>
+                  Technical Support
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     let fhirClient = null;
     let currentPatientId = null;
+    let appSettings = null;
+
+    // Load app settings
+    async function loadAppSettings() {
+      try {
+        const response = await fetch('appSettings.json');
+        appSettings = await response.json();
+        populateAppInformation();
+      } catch (error) {
+        console.error('Error loading app settings:', error);
+      }
+    }
+
+    // Populate app information in the UI
+    function populateAppInformation() {
+      if (!appSettings) return;
+
+      const info = appSettings.applicationInformation;
+      const products = appSettings.products;
+      const apiAccess = appSettings.apiAccess;
+
+      // Basic Information
+      $('#appName').text(info.applicationName);
+      $('#appOwner').text(info.applicationOwner);
+      $('#appId').text(info.applicationId);
+      $('#clientId').text(info.clientId);
+      $('#appType').text(info.applicationType);
+      $('#accessType').text(info.typeOfAccess);
+      $('#privacyLevel').text(info.applicationPrivacy);
+      $('#smartVersion').text(info.smartVersion);
+
+      // Technical Details
+      $('#fhirVersion').text(info.defaultFhirVersion);
+      
+      // Intended Users
+      const usersHtml = info.intendedUsers.map(user => 
+        `<span class="badge bg-light text-dark me-1">${user}</span>`
+      ).join('');
+      $('#intendedUsers').html(usersHtml);
+
+      // Intended Purposes
+      const purposesHtml = info.intendedPurposes.map(purpose => 
+        `<span class="badge bg-light text-dark me-1">${purpose}</span>`
+      ).join('');
+      $('#intendedPurposes').html(purposesHtml);
+
+      $('#redirectUri').text(info.redirectUri);
+      $('#launchUri').text(info.smartLaunchUri);
+
+      // API Access Summary
+      const capabilitiesHtml = apiAccess.standardCapabilities.map(cap => 
+        `<span class="badge bg-secondary me-1">${cap}</span>`
+      ).join('');
+      $('#standardCapabilities').html(capabilitiesHtml);
+
+      $('#productFamily').text(products.productFamily);
+      
+      const productsHtml = products.products.map(product => 
+        `<div class="small text-muted">${product}</div>`
+      ).join('');
+      $('#products').html(productsHtml);
+
+      // API Access Details
+      const userApisHtml = apiAccess.userProductAPIs.map(api => 
+        `<div class="api-item">
+          <span class="api-name">${api.name}</span>
+          <div class="api-access">
+            ${api.access.map(access => 
+              `<span class="badge ${access === 'read' ? 'bg-success' : 'bg-warning text-dark'} access-badge">${access}</span>`
+            ).join('')}
+          </div>
+        </div>`
+      ).join('');
+      $('#userProductAPIs').html(userApisHtml);
+
+      const patientApisHtml = apiAccess.patientProductAPIs.map(api => 
+        `<div class="api-item">
+          <span class="api-name">${api.name}</span>
+          <div class="api-access">
+            ${api.access.map(access => 
+              `<span class="badge ${access === 'read' ? 'bg-success' : 'bg-warning text-dark'} access-badge">${access}</span>`
+            ).join('')}
+          </div>
+        </div>`
+      ).join('');
+      $('#patientProductAPIs').html(patientApisHtml);
+
+      // Links
+      if (info.privacyPolicyUri) {
+        $('#privacyPolicyLink').attr('href', info.privacyPolicyUri);
+      } else {
+        $('#privacyPolicyLink').hide();
+      }
+
+      if (info.termsOfServiceUri) {
+        $('#termsOfServiceLink').attr('href', info.termsOfServiceUri);
+      } else {
+        $('#termsOfServiceLink').hide();
+      }
+
+      if (info.technicalSupportContactUri) {
+        $('#technicalSupportLink').attr('href', info.technicalSupportContactUri);
+      } else {
+        $('#technicalSupportLink').hide();
+      }
+    }
+
+    // Initialize app settings
+    loadAppSettings();
+
+    // Toggle app information section
+    function toggleAppInfo() {
+      const section = document.getElementById('appInfoSection');
+      const button = document.getElementById('appInfoToggle');
+      const icon = button.querySelector('i');
+      
+      if (section.style.display === 'none') {
+        section.style.display = 'block';
+        icon.className = 'bi bi-chevron-up';
+        button.title = 'Hide Application Information';
+      } else {
+        section.style.display = 'none';
+        icon.className = 'bi bi-info-circle';
+        button.title = 'Show Application Information';
+      }
+    }
 
     // Initialize FHIR client
     FHIR.oauth2.ready().then(async client => {
