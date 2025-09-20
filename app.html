@@ -114,10 +114,16 @@
         <i class="bi bi-heart-pulse me-2"></i>
         FHIR API Testing Dashboard
       </a>
-      <span class="navbar-text" id="userInfo">
-        <i class="bi bi-person-circle me-1"></i>
-        Loading user...
-      </span>
+      <div class="navbar-nav ms-auto d-flex flex-row">
+        <a class="nav-link text-white me-3" href="ref/oracle-fhir-swagger-ui.html" target="_blank">
+          <i class="bi bi-book me-1"></i>
+          API Docs
+        </a>
+        <span class="navbar-text" id="userInfo">
+          <i class="bi bi-person-circle me-1"></i>
+          Loading user...
+        </span>
+      </div>
     </div>
   </nav>
 
@@ -129,6 +135,33 @@
         <div class="alert alert-info mb-4" role="alert" id="connectionStatus">
           <i class="bi bi-wifi me-2"></i>
           <span id="statusText">Connecting to FHIR server...</span>
+        </div>
+
+        <!-- API Documentation Quick Access -->
+        <div class="card api-card mb-4">
+          <div class="card-header">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-book me-2"></i>
+              API Documentation & Testing
+            </h5>
+          </div>
+          <div class="card-body">
+            <p class="card-text text-muted">Access interactive API documentation and testing interfaces</p>
+            <div class="d-flex flex-wrap gap-2">
+              <a href="ref/oracle-fhir-swagger-ui.html" target="_blank" class="btn btn-primary-custom">
+                <i class="bi bi-heart-pulse me-1"></i>
+                Oracle FHIR API
+              </a>
+              <a href="ref/stirling-pdf-swagger.html" target="_blank" class="btn btn-outline-primary-custom">
+                <i class="bi bi-file-earmark-pdf me-1"></i>
+                Stirling PDF API
+              </a>
+              <button class="btn btn-outline-primary-custom" onclick="openCustomSwagger()">
+                <i class="bi bi-link-45deg me-1"></i>
+                Custom API
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- API Testing Cards - Stacked Vertically -->
@@ -593,6 +626,14 @@
         updateStatus('practitioner', 'success', `Current user: ${user.resourceType}`);
       } catch (error) {
         updateStatus('practitioner', 'error', 'Failed to load current user');
+      }
+    }
+
+    // API Documentation Functions
+    function openCustomSwagger() {
+      const url = prompt('Enter Swagger JSON URL:', 'https://api.example.com/swagger.json');
+      if (url) {
+        window.open(`ref/oracle-fhir-swagger-ui.html?url=${encodeURIComponent(url)}`, '_blank');
       }
     }
   </script>

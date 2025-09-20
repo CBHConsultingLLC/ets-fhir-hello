@@ -1,0 +1,112 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Stirling PDF API",
+    "description": "API for PDF processing and manipulation services",
+    "version": "5.28.0"
+  },
+  "host": "silver-archivist.ehrtechsolutions.com:9996",
+  "basePath": "/",
+  "schemes": ["http", "https"],
+  "consumes": ["application/json", "multipart/form-data"],
+  "produces": ["application/json", "application/pdf"],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "API Status",
+        "description": "Get API status and available endpoints",
+        "responses": {
+          "200": {
+            "description": "API is running",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "online"
+                },
+                "version": {
+                  "type": "string",
+                  "example": "5.28.0"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/convert/pdf-to-images": {
+      "post": {
+        "summary": "Convert PDF to Images",
+        "description": "Convert PDF pages to image files",
+        "consumes": ["multipart/form-data"],
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "required": true,
+            "type": "file",
+            "description": "PDF file to convert"
+          },
+          {
+            "name": "format",
+            "in": "formData",
+            "type": "string",
+            "enum": ["png", "jpg", "jpeg"],
+            "default": "png",
+            "description": "Output image format"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Images generated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "images": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/convert/images-to-pdf": {
+      "post": {
+        "summary": "Convert Images to PDF",
+        "description": "Convert image files to PDF",
+        "consumes": ["multipart/form-data"],
+        "parameters": [
+          {
+            "name": "files",
+            "in": "formData",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "file"
+            },
+            "description": "Image files to convert"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF generated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "pdf": {
+                  "type": "string",
+                  "description": "Base64 encoded PDF"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

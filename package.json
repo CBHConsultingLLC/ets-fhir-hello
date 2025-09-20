@@ -1,0 +1,32 @@
+{
+  "name": "ets-fhir-hello",
+  "version": "1.0.0",
+  "description": "FHIR API testing application for Oracle Health Millennium Platform",
+  "main": "app.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "python -m http.server 8000",
+    "dev": "python -m http.server 8000"
+  },
+  "keywords": [
+    "fhir",
+    "healthcare",
+    "oracle",
+    "api",
+    "testing"
+  ],
+  "author": "Stephen",
+  "license": "MIT",
+  "dependencies": {
+    "fhirclient": "^2.4.0"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/ets-fhir-hello.git"
+  },
+  "homepage": "https://your-username.github.io/ets-fhir-hello/",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

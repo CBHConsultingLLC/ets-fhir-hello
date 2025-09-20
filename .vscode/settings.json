@@ -1,0 +1,19 @@
+{
+  "files.associations": {
+    "oracle-fhir-swagger.json": "json",
+    "swagger-config.js": "javascript"
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["oracle-fhir-swagger.json"],
+      "url": "https://swagger.io/specification/v2/schema.json"
+    }
+  ],
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "editor.suggest.insertMode": "replace",
+  "html.suggest.html5": true,
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true
+}
